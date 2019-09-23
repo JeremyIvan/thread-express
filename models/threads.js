@@ -17,14 +17,14 @@ let commentSchema = new Schema({
 })
 
 let threadSchema = new Schema({
-    user: {
-        type: String,
-        required: true
-    },
     title: {
         type: String,
         required: true,
         unique: true
+    },
+    body: {
+        type: String,
+        required: true,
     },
     canModify: {
         type: Boolean,

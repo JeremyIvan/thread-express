@@ -1,0 +1,58 @@
+<% include header %>
+
+<h2>Thread List</h2>
+
+<div class="container-fluid"> 
+
+    <div class="list-group">
+        <% if (threads.length) { %>
+            <% threads.forEach(function(entry) { %>
+                <div class="text-muted float-right">
+
+                    <button type="button" class="list-group-item list-group-item-action" name="selectedStudent" id="selectedStudent">
+                        <div>
+                            <%= entry.title%>
+                        </div>
+
+                        <div class="form-group">
+                            <%= entry.body%>
+                        </div>
+                    </button>
+
+                    <div class="form-group float-right">
+                        <!-- Student ID is only for testing -->
+                        <a href="/viewThread/<%= entry.title %>" class="btn btn-info float-right">
+                            View
+                        </a>
+                    </div>
+                        
+                    <div class="form-group float-right">
+                        <a href="/editThread/<%= entry.title %>" class="btn btn-warning float-right">
+                            Edit
+                        </a>
+                    </div>
+                        
+                    <div class="form-group float-right">
+                        <!-- Student ID is only for testing -->
+                        <a href="/deleteThread/<%= entry.title %>" class="btn btn-danger float-right">
+                            Delete
+                        </a>
+                    </div>
+
+                    
+                </div>
+            <% }) %>
+        <% } else { %>   
+            No Threads found! <a href="/createThread">Create one!</a>
+        <% } %>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function reply_click(clicked_id)
+    {
+        alert(clicked_id);
+    }
+</script>
+
+<% include footer %>

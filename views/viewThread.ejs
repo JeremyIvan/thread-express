@@ -1,0 +1,20 @@
+<% include header %>
+
+<h2>Thread</h2>
+
+<div class="form-group row">
+    <label class="input-group-text col-sm-2">Title:</label>
+    <label class="input-group-text col-sm-10">
+        <%= threads.title %>
+    </label>
+</div>
+
+<div class="form-group row">
+    <label class="input-group-text col-sm-2">Content:</label>
+    <textarea class="input-group-text col-sm-10" rows="5" disabled>
+        <%= threads.body %>
+    </textarea>
+</div>
+
+
+<% include footer %>
