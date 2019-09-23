@@ -10,9 +10,9 @@ let commentSchema = new Schema({
         type: String,
         required: true
     },
-    canModify: {
-        type: Boolean,
-        default: false
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 })
 
@@ -29,10 +29,6 @@ let threadSchema = new Schema({
     image: {
         type: String,
         data: Buffer
-    },
-    canModify: {
-        type: Boolean,
-        default: false
     },
     comments: [commentSchema]
 })
