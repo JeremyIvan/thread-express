@@ -57,6 +57,26 @@ threadRouter.route('/viewThread/:threadTitle')
 })
 
 threadRouter.route('/editThread/:threadTitle')
+.get((req, res, next) => {
+    Threads.findOne({ "title" : req.params.threadTitle})
+    .then(thread => {
+        res.render('editThread', { threads : thread })
+        res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json')
+            res.json(thread)
+    })
+})
+.post((req, res, next) => {
+    Threads.findOneAndUpdate({ "title" : req.params.threadTitle }, {
+        $set: req.body
+    }, { new: true })
+    .then(thread => {
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.redirect('/listThreads')
+    }, err => next(err))
+    .catch(err => next(err))
+})
 
 threadRouter.route('/deleteThread/:threadTitle')
 .get((req, res, next) => {

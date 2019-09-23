@@ -26,6 +26,10 @@ let threadSchema = new Schema({
         type: String,
         required: true,
     },
+    image: {
+        type: String,
+        data: Buffer
+    },
     canModify: {
         type: Boolean,
         default: false
