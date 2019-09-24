@@ -1,22 +1,38 @@
 <% include header %>
 
-<h2>Create Thread</h2>
+<h2>Sign Up User</h2>
 
 <form method="post" role="form">
     <div class="form-group row">
-        <label for="title" class="input-group-text col-sm-2">Title:</label>
+        <label for="username" class="input-group-text col-sm-2">Username:</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="title" name="title" placeholder="Title" required>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
         </div>
     </div> 
-  
+    
     <div class="form-group row">
-        <label for="body" class="input-group-text col-sm-2">Body:</label>
-        <textarea type="text" class="form-control" id="body" name="body" placeholder="Enter Content here..." rows="5" required></textarea>
-    </div>
+        <label for="password" class="input-group-text col-sm-2">Password:</label>
+        <div class="col-sm-10">
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+    </div> 
+
+    <div class="form-group row">
+        <label for="firstname" class="input-group-text col-sm-2">First Name:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="firstname" name="firstname" placeholder="First Name" required>
+        </div>
+    </div> 
+
+    <div class="form-group row">
+        <label for="lastname" class="input-group-text col-sm-2">Last Name:</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Last Name" required>
+        </div>
+    </div> 
 
     <div class="form-group float-right">
-        <input type="submit" value="Post" class="btn btn-primary">
+        <input type="submit" value="Sign Up" class="btn btn-primary">
     </div>
 </form>
 

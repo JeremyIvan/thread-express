@@ -21,20 +21,20 @@
 
                     <div class="form-group float-right">
                         <!-- Student ID is only for testing -->
-                        <a href="/viewThread/<%= entry.title %>" class="btn btn-info float-right">
+                        <a href="/threads/viewThread/<%= entry.title %>" class="btn btn-info float-right">
                             View
                         </a>
                     </div>
                         
                     <div class="form-group float-right">
-                        <a href="/editThread/<%= entry.title %>" class="btn btn-warning float-right">
+                        <a href="/threads/editThread/<%= entry.title %>" class="btn btn-warning float-right">
                             Edit
                         </a>
                     </div>
                         
                     <div class="form-group float-right">
                         <!-- Student ID is only for testing -->
-                        <a href="/deleteThread/<%= entry.title %>" class="btn btn-danger float-right">
+                        <a href="/threads/deleteThread/<%= entry.title %>" class="btn btn-danger float-right">
                             Delete
                         </a>
                     </div>
@@ -43,7 +43,7 @@
                 </div>
             <% }) %>
         <% } else { %>   
-            No Threads found! <a href="/createThread">Create one!</a>
+            No Threads found! <a href="/threads/createThread">Create one!</a>
         <% } %>
     </div>
 </div>

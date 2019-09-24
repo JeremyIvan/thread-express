@@ -5,13 +5,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const passport = require('passport')
 
 const config = require('./config')
 
-// const indexRouter = require('./routes/index');
-// const usersRouter = require('./routes/users');
-
 const threadRouter = require('./routes/threadRouter')
+const userRouter = require('./routes/userRouter')
 
 const connect = mongoose.connect(config.mongoUrl)
 
@@ -31,22 +30,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use('/', indexRouter);
-// app.use('/users', usersRouter);
+app.use(passport.initialize())
 
-app.use('', threadRouter)
+app.use('/users', userRouter)
+app.use('/threads', threadRouter)
 
 app.get('/', (req, res) => {
-  res.redirect('/listThreads')
+  res.redirect('/users/login')
 })
-
-// app.get('/listThreads', (req, res) => {
-//   res.render('listThreads')
-// })
-
-// app.get('/createThread', (req, res) => {
-//   res.render('createThread')
-// })
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

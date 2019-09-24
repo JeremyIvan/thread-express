@@ -1,7 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+// const multer = require('multer')
 
 const Threads = require('../models/threads')
+const authenticate = require('../authenticate')
+
+// const upload = multer({ dest: 'uploads/' })
 
 const threadRouter = express.Router()
 
@@ -20,7 +24,7 @@ threadRouter.route('/listThreads')
 })
 
 threadRouter.route('/createThread')
-.get((req, res, next) => {
+.get(authenticate.verifyUser , (req, res, next) => {
     res.render('createThread')
 })
 .post((req, res, next) => {
@@ -29,7 +33,7 @@ threadRouter.route('/createThread')
         if(req.body != null){
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
-            res.redirect('/listThreads')
+            res.redirect('/threads/listThreads')
         }
         else {
             res.status(400).send('Entries must not be empty.')
@@ -73,7 +77,7 @@ threadRouter.route('/editThread/:threadTitle')
     .then(thread => {
         res.statusCode = 200
         res.setHeader('Content-Type', 'application/json')
-        res.redirect('/listThreads')
+        res.redirect('/threads/listThreads')
     }, err => next(err))
     .catch(err => next(err))
 })
@@ -85,7 +89,7 @@ threadRouter.route('/deleteThread/:threadTitle')
         if ( thread != null) {
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
-            res.redirect('/listThreads')
+            res.redirect('/threads/listThreads')
         }
         else {
             res.render('error.jade')

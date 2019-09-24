@@ -27,8 +27,11 @@ let threadSchema = new Schema({
         required: true,
     },
     image: {
-        type: String,
-        data: Buffer
+        type: String
+    },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     comments: [commentSchema]
 })
