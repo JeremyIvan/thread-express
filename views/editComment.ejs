@@ -1,0 +1,16 @@
+<% include header %>
+
+<h2>Edit Comment</h2>
+
+<form method="post" role="form">
+    <div class="form-group row">
+        <label for="comment" class="input-group-text col-sm-2">Comment:</label>
+        <textarea type="text" class="form-control" id="comment" name="comment"  rows="5" required><%= threads.comment %></textarea>
+    </div>
+
+    <div class="form-group float-right">
+        <input type="submit" value="Edit" class="btn btn-primary">
+    </div>
+</form>
+
+<% include footer %>

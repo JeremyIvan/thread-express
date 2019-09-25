@@ -1,11 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-// const multer = require('multer')
 
 const Threads = require('../models/threads')
 const authenticate = require('../authenticate')
-
-// const upload = multer({ dest: 'uploads/' })
 
 const threadRouter = express.Router()
 
@@ -33,7 +30,6 @@ threadRouter.route('/createThread')
         if(req.body != null){
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json')
-            res.json(thread)
             res.redirect('/threads/listThreads')
         }
         else {
@@ -67,8 +63,8 @@ threadRouter.route('/editThread/:threadTitle')
     .then(thread => {
         res.render('editThread', { threads : thread })
         res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.json(thread)
+        res.setHeader('Content-Type', 'application/json')
+        res.json(thread)
     })
 })
 .post((req, res, next) => {
@@ -141,6 +137,56 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
         }
         else {
             err = new Error('Comment ' + req.params.commentId + " not found")
+            err.status = 404
+            return next(err)
+        }
+    }, err => next(err))
+    .catch(err => next(err))
+})
+
+threadRouter.route('/delete')
+.delete((req, res, next) => {
+    Threads.remove({})
+    .then((resp)=>{
+        res.statusCode=200;
+        res.setHeader("Content-Type", "application/json");
+        res.json(resp);
+    }, (err)=>next(err))
+    .catch((err)=>next(err));
+})
+
+threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
+.get((req, res, next) => {
+    Threads.findOne({ "title" : req.params.threadTitle})
+    .then(thread => {
+        res.render('editComment', {threads : thread.comments.id(req.params.commentId)})
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.json(thread.comments.id(req.params.commentId))
+    })
+})
+.post((req, res, next) => {
+    Threads.findOne({ "title" : req.params.threadTitle })
+    .then(thread => {
+        if(thread != null && thread.comments.id(req.params.commentId) != null) {
+            if(req.body.comment) {
+                thread.comments.id(req.params.commentId).comment = req.body.comment 
+                // console.log(req.body.comment)
+            }
+            thread.save()
+            .then(thread => {
+                res.statusCode = 200
+                res.setHeader('Content-Type', 'application/json')
+                res.redirect('/threads/viewThread/' + req.params.threadTitle)
+            }, err => next(err))
+        }
+        else if (thread == null) {
+            err = new Error('Thread ' + req.params.threadTitle + ' not found')
+            err.status = 404
+            return next(err)
+        }
+        else {
+            err = new Error('Comment ' + req.params.commentId + ' not found')
             err.status = 404
             return next(err)
         }
