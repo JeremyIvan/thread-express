@@ -1,8 +1,28 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const multer = require('multer')
 
 const Threads = require('../models/threads')
 const authenticate = require('../authenticate')
+
+const storage = multer.diskStorage({
+    destination : (req, file, cb) => {
+        cb(null, 'public/images')
+    },
+
+    filename : (req, file, cb) => {
+        cb(null, file.originalname)
+    }
+})
+
+const imageFileFilter = (req, file, cb) => {
+    if( !file.originalname.match(/\.(jpg|jpeg|png|gif)$/)){
+        return cb(new Error('You can upload only image files!'), false)
+    }
+    cb(null, true)
+}
+
+const upload = multer({ storage : storage , fileFilter : imageFileFilter })
 
 const threadRouter = express.Router()
 
@@ -10,12 +30,14 @@ threadRouter.use(bodyParser.json())
 
 threadRouter.route('/listThreads')
 .get((req, res, next) => {
+    
+    res.setHeader('Content-type', 'application/json')
+    res.setHeader('Authorization', req.cookies.authToken)
+
     Threads.find({})
-    .then((threads) => {
+    .then(threads => {
         res.render('listThreads', { threads: threads })
         res.statusCode = 200
-        // res.setHeader('Content-type', 'application/json')
-        res.json(threads)
     }, err => next(err))
     .catch(err => next(err))
 })
@@ -24,7 +46,8 @@ threadRouter.route('/createThread')
 .get((req, res, next) => {
     res.render('createThread')
 })
-.post((req, res, next) => {
+.post(upload.single('image'), (req, res, next) => {
+    console.log(req.body.image)
     Threads.create(req.body)
     .then(thread => {
         if(req.body != null){
@@ -144,17 +167,6 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
     .catch(err => next(err))
 })
 
-threadRouter.route('/delete')
-.delete((req, res, next) => {
-    Threads.remove({})
-    .then((resp)=>{
-        res.statusCode=200;
-        res.setHeader("Content-Type", "application/json");
-        res.json(resp);
-    }, (err)=>next(err))
-    .catch((err)=>next(err));
-})
-
 threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
 .get((req, res, next) => {
     Threads.findOne({ "title" : req.params.threadTitle})
@@ -171,7 +183,6 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
         if(thread != null && thread.comments.id(req.params.commentId) != null) {
             if(req.body.comment) {
                 thread.comments.id(req.params.commentId).comment = req.body.comment 
-                // console.log(req.body.comment)
             }
             thread.save()
             .then(thread => {

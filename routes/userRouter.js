@@ -54,16 +54,8 @@ userRouter.route("/login")
   var token = authenticate.getToken({ _id: req.user._id })
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
-
-  // var authToken = { "authToken" :  token.replace(/['"]+/g, '') }
-
-  // fs.writeFile('public/authtoken.json', JSON.stringify(authToken), 'utf8', err => {
-  //   if (err) {
-  //     return res.json(err)
-  //   }
-    res.redirect('/threads/listThreads')
-  // })
-  // res.json(token)
+  res.cookie('authToken', token.replace(/['"]+/g, ''))
+  res.redirect('/threads/listThreads')
 });
 
 module.exports = userRouter
