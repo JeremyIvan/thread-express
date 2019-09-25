@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const passport = require('passport')
+// const fs = require('fs')
 
 const User = require('../models/users')
 const authenticate = require('../authenticate')
@@ -52,17 +53,17 @@ userRouter.route("/login")
 .post(passport.authenticate('local'), (req, res) => {
   var token = authenticate.getToken({ _id: req.user._id })
   res.statusCode = 200;
-  res.set({
-    "Content-Type": "applicaiton/json",
-  })
-  
-  res.set({
-    "Authorization": "bearer " + token
-  })
-  // res.setHeader("Content-Type", "application/json");
-  
-  // res.json({success: true, token: token, status:"You are succesfully logged in"})
-  res.redirect('/threads/listThreads')
+  res.setHeader("Content-Type", "application/json");
+
+  // var authToken = { "authToken" :  token.replace(/['"]+/g, '') }
+
+  // fs.writeFile('public/authtoken.json', JSON.stringify(authToken), 'utf8', err => {
+  //   if (err) {
+  //     return res.json(err)
+  //   }
+    res.redirect('/threads/listThreads')
+  // })
+  // res.json(token)
 });
 
 module.exports = userRouter

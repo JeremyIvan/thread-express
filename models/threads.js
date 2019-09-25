@@ -2,10 +2,6 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 let commentSchema = new Schema({
-    user: {
-        type: String,
-        required: true,
-    },
     comment: {
         type: String,
         required: true
@@ -32,6 +28,7 @@ let threadSchema = new Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+        // required: true
     },
     comments: [commentSchema]
 })
