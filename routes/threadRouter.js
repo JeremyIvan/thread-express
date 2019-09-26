@@ -26,7 +26,6 @@ threadRouter.use(bodyParser.json())
 
 threadRouter.route('/listThreads')
 .get((req, res, next) => {
-    console.log(req.body.author)
     Threads.find({})
     .populate('author')
     .populate('comments.author')
@@ -39,24 +38,42 @@ threadRouter.route('/listThreads')
 
 threadRouter.route('/createThread')
 .get(authenticate.verifyUser, (req, res, next) => {
-    res.render('createThread.ejs')
+    res.render('createThread')
 })
 .post(authenticate.verifyUser, upload.single('image'), (req, res, next) => {
-    req.body.image = req.file.filename
-    req.body.author = req.user._id
-    Threads.create(req.body)
-    .then(thread => {
-        if(req.body != null){
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.redirect('/threads/listThreads')
-        }
-        else {
-            res.status(400).send('Entries must not be empty.')
-            return
-        }
-    }, err => next(err))
-    .catch(err => next(err))
+    if(req.file !== undefined) {
+        req.body.image = req.file.filename
+        req.body.author = req.user._id
+        Threads.create(req.body)
+        .then(thread => {
+            if(req.body != null){
+                res.statusCode = 200
+                res.setHeader('Content-Type', 'application/json')
+                res.redirect('/threads/listThreads')
+            }
+            else {
+                res.status(400).send('Entries must not be empty.')
+                return
+            }
+        }, err => next(err))
+        .catch(err => next(err))
+    }
+    else{ 
+        req.body.author = req.user._id
+        Threads.create(req.body)
+        .then(thread => {
+            if(req.body != null){
+                res.statusCode = 200
+                res.setHeader('Content-Type', 'application/json')
+                res.redirect('/threads/listThreads')
+            }
+            else {
+                res.status(400).send('Entries must not be empty.')
+                return
+            }
+        }, err => next(err))
+        .catch(err => next(err))
+    }
 })
 
 threadRouter.route('/viewThread/:threadTitle')
@@ -78,41 +95,61 @@ threadRouter.route('/viewThread/:threadTitle')
 
 threadRouter.route('/editThread/:threadTitle')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle})
+    Threads.findOne({ "title": req.params.threadTitle })
     .then(thread => {
-        res.render('editThread', { threads : thread })
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(thread)
+        if(thread.author._id.equals(req.user._id)){
+            Threads.findOne({ "title" : req.params.threadTitle})
+            .then(thread => {
+                res.render('editThread', { threads : thread })
+                res.statusCode = 200
+            })
+        }
+        else {
+            return next(new Error("You are not authorized to modify thread"))
+        }
     })
 })
 .post(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOneAndUpdate({ "title" : req.params.threadTitle }, {
-        $set: req.body
-    }, { new: true })
+    Threads.findOne({ "title": req.params.threadTitle })
     .then(thread => {
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.redirect('/threads/listThreads')
-    }, err => next(err))
-    .catch(err => next(err))
-    
+        if(thread.author._id.equals(req.user._id)){
+            Threads.findOneAndUpdate({ "title" : req.params.threadTitle }, {
+                $set: req.body
+            }, { new: true })
+            .then(thread => {
+                res.statusCode = 200
+                res.redirect('/threads/listThreads')
+            }, err => next(err))
+            .catch(err => next(err))
+        }
+        else {
+            return next(new Error("You are not authorized to modify thread"))
+        }
+    })
 })
 
 threadRouter.route('/deleteThread/:threadTitle')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOneAndRemove({ "title" : req.params.threadTitle })
+    Threads.findOne({ "title": req.params.threadTitle })
     .then(thread => {
-        if ( thread != null) {
-            res.statusCode = 200
-            res.setHeader('Content-Type', 'application/json')
-            res.redirect('/threads/listThreads')
+        if(thread.author._id.equals(req.user._id)){
+            Threads.findOneAndRemove({ "title" : req.params.threadTitle })
+            .then(thread => {
+                if ( thread != null) {
+                    res.statusCode = 200
+                    res.setHeader('Content-Type', 'application/json')
+                    res.redirect('/threads/listThreads')
+                }
+                else {
+                    res.render('error.jade')
+                }
+            }, err => next(err))
+            .catch(err => next(err))
         }
         else {
-            res.render('error.jade')
+            return next(new Error("You are not authorized to delete thread"))
         }
-    }, err => next(err))
-    .catch(err => next(err))
+    })
 })
 
 threadRouter.route('/viewThread/:threadTitle/postComment')
@@ -144,16 +181,37 @@ threadRouter.route('/viewThread/:threadTitle/postComment')
 
 threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne( { "title" : req.params.threadTitle })
+    Threads.findOne({ "title" : req.params.threadTitle })
     .then(thread => {
         if(thread != null && thread.comments.id(req.params.commentId) != null){
-            thread.comments.id(req.params.commentId).remove()
-            thread.save()
-            .then(thread => {
-                res.statusCode = 200
-                res.setHeader('Content-Type', 'application/json')
-                res.redirect('/threads/viewThread/' + req.params.threadTitle)
-            }, err => next(err))
+            if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+                Threads.findOne( { "title" : req.params.threadTitle })
+                .then(thread => {
+                    if(thread != null && thread.comments.id(req.params.commentId) != null){
+                        thread.comments.id(req.params.commentId).remove()
+                        thread.save()
+                        .then(thread => {
+                            res.statusCode = 200
+                            res.setHeader('Content-Type', 'application/json')
+                            res.redirect('/threads/viewThread/' + req.params.threadTitle)
+                        }, err => next(err))
+                    }
+                    else if (thread == null){
+                        err = new Error('Thread ' + req.params.threadTitle + " not found")
+                        err.status = 404
+                        return next(err)
+                    }
+                    else {
+                        err = new Error('Comment ' + req.params.commentId + " not found")
+                        err.status = 404
+                        return next(err)
+                    }
+                }, err => next(err))
+                .catch(err => next(err))
+            }
+            else {
+                return next(new Error("You are not authorized to delete comment"))
+            }
         }
         else if (thread == null){
             err = new Error('Thread ' + req.params.threadTitle + " not found")
@@ -165,46 +223,105 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
             err.status = 404
             return next(err)
         }
-    }, err => next(err))
-    .catch(err => next(err))
+    })
 })
 
 threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle})
+    Threads.findOne({ "title" : req.params.threadTitle })
     .then(thread => {
-        res.render('editComment', {threads : thread.comments.id(req.params.commentId)})
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        res.json(thread.comments.id(req.params.commentId))
+        if(thread != null && thread.comments.id(req.params.commentId) != null){
+            if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+                Threads.findOne({ "title" : req.params.threadTitle })
+                .then(thread => {
+                    if(thread != null && thread.comments.id(req.params.commentId) != null){
+                        if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+                            Threads.findOne({ "title" : req.params.threadTitle})
+                            .then(thread => {
+                                res.render('editComment', {threads : thread.comments.id(req.params.commentId)})
+                                res.statusCode = 200
+                                res.setHeader('Content-Type', 'application/json')
+                                res.json(thread.comments.id(req.params.commentId))
+                            })
+                        }
+                        else {
+                            return next(new Error("You are not authorized to delete comment"))
+                        }
+                    }
+                    else if (thread == null){
+                        err = new Error('Thread ' + req.params.threadTitle + " not found")
+                        err.status = 404
+                        return next(err)
+                    }
+                    else {
+                        err = new Error('Comment ' + req.params.commentId + " not found")
+                        err.status = 404
+                        return next(err)
+                    }
+                })
+            }
+            else {
+                return next(new Error("You are not authorized to modify comment"))
+            }
+        }
+        else if (thread == null){
+            err = new Error('Thread ' + req.params.threadTitle + " not found")
+            err.status = 404
+            return next(err)
+        }
+        else {
+            err = new Error('Comment ' + req.params.commentId + " not found")
+            err.status = 404
+            return next(err)
+        }
     })
 })
 .post(authenticate.verifyUser, (req, res, next) => {
     Threads.findOne({ "title" : req.params.threadTitle })
     .then(thread => {
-        if(thread != null && thread.comments.id(req.params.commentId) != null) {
-            if(req.body.comment) {
-                thread.comments.id(req.params.commentId).comment = req.body.comment 
+        if(thread != null && thread.comments.id(req.params.commentId) != null){
+            if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
+                Threads.findOne({ "title" : req.params.threadTitle })
+                .then(thread => {
+                    if(thread != null && thread.comments.id(req.params.commentId) != null) {
+                        if(req.body.comment) {
+                            thread.comments.id(req.params.commentId).comment = req.body.comment 
+                        }
+                        thread.save()
+                        .then(thread => {
+                            res.statusCode = 200
+                            res.setHeader('Content-Type', 'application/json')
+                            res.redirect('/threads/viewThread/' + req.params.threadTitle)
+                        }, err => next(err))
+                    }
+                    else if (thread == null) {
+                        err = new Error('Thread ' + req.params.threadTitle + ' not found')
+                        err.status = 404
+                        return next(err)
+                    }
+                    else {
+                        err = new Error('Comment ' + req.params.commentId + ' not found')
+                        err.status = 404
+                        return next(err)
+                    }
+                }, err => next(err))
+                .catch(err => next(err))
             }
-            thread.save()
-            .then(thread => {
-                res.statusCode = 200
-                res.setHeader('Content-Type', 'application/json')
-                res.redirect('/threads/viewThread/' + req.params.threadTitle)
-            }, err => next(err))
+            else {
+                return next(new Error("You are not authorized to modify comment"))
+            }
         }
-        else if (thread == null) {
-            err = new Error('Thread ' + req.params.threadTitle + ' not found')
+        else if (thread == null){
+            err = new Error('Thread ' + req.params.threadTitle + " not found")
             err.status = 404
             return next(err)
         }
         else {
-            err = new Error('Comment ' + req.params.commentId + ' not found')
+            err = new Error('Comment ' + req.params.commentId + " not found")
             err.status = 404
             return next(err)
         }
-    }, err => next(err))
-    .catch(err => next(err))
+    })    
 })
 
 module.exports = threadRouter

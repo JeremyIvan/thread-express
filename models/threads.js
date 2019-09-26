@@ -22,9 +22,7 @@ let threadSchema = new Schema({
         type: String,
         required: true,
     },
-    image: {
-        type: String
-    },
+    image: String,
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

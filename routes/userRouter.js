@@ -37,7 +37,6 @@ userRouter.route('/signup')
           }
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json");
-          // res.json(req.body)
           res.redirect('/users/login')
         })
       })
@@ -55,6 +54,19 @@ userRouter.route("/login")
   res.setHeader("Content-Type", "application/json");
   res.cookie('authToken', token.replace(/['"]+/g, ''))
   res.redirect('/threads/listThreads')
+});
+
+userRouter.route("/logout")
+.get(authenticate.verifyUser, (req, res, next)=>{
+  if (req.cookies) {
+    res.clearCookie('authToken', { path: '/', domain: 'localhost' })
+    res.redirect('/')
+  }
+  else {
+      var err = new Error('You are not logged in!')
+      err.status = 403
+      return next(err)
+  }
 });
 
 module.exports = userRouter
