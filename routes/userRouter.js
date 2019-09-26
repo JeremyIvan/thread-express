@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const passport = require('passport')
-// const fs = require('fs')
 
 const User = require('../models/users')
 const authenticate = require('../authenticate')
@@ -38,7 +37,7 @@ userRouter.route('/signup')
           }
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json");
-          res.json({success: true, status:"Registration Success"})
+          // res.json(req.body)
           res.redirect('/users/login')
         })
       })

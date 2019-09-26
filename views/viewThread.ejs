@@ -10,10 +10,15 @@
 </div>
 
 <div class="form-group row">
+        <label class="input-group-text col-sm-2">Author:</label>
+        <label class="input-group-text col-sm-10">
+            <%= threads.author.username %>
+        </label>
+</div>
+
+<div class="form-group row">
     <label class="input-group-text col-sm-2">Image:</label>
-    <label class="input-group-text col-sm-10">
-        <%= threads.image %>
-    </label>
+    <img src="/images/<%= threads.image %>" alt="No Thread Image Found" class="input-group-text col-sm-10">
 </div>
 
 <div class="form-group row">
@@ -28,22 +33,20 @@
     <label class="form-group row">
         <% if (threads.comments.length) { %>
             <% threads.comments.forEach(function(entry) { %>
-                <div class="input-group-text float-right col-sm-10">
+                <div class="border border-primary float-right col-sm-10">
                     <label class="list-group-item list-group-item-action" name="selectedStudent" id="selectedStudent">
-                        <!-- <div>
-                            <%= entry.author%>
-                        </div> -->
-
+                        <label class="input-group-text col-sm-2">
+                            <%= entry.author.username%>
+                        </label>
                         <div class="form-group">
                             <%= entry.comment%>
+                            <div class="form-group float-right">
+                                <a href="/threads/viewThread/<%= threads.title %>/deleteComment/<%= entry._id %>" class="btn btn-danger float-right">
+                                    <span aria-hidden="true">&times;</span>
+                                </a>
+                            </div>
                         </div>
                     </label>
-                </div>
-
-                <div class="form-group float-right">
-                    <a href="/threads/viewThread/<%= threads.title %>/deleteComment/<%= entry._id %>" class="btn btn-danger float-right">
-                        Delete
-                    </a>
                 </div>
 
                 <div class="form-group float-right">
@@ -58,12 +61,7 @@
     </label>
 </div>
 
-
-
-
 <form method="post" role="form" action="/threads/viewThread/<%= threads.title %>/postComment">
-        <!-- <h3><%= threads.title %></h3> -->
-
     <div class="form-group row">
         <label for="comment" class="input-group-text col-sm-2">Post Comment:</label>
         <textarea type="text" class="form-control" id="comment" name="comment" placeholder="Enter Comment here..." rows="5" required></textarea>
@@ -73,6 +71,5 @@
         <input type="submit" value="Post Comment" class="btn btn-primary">
     </div>
 </form>
-
 
 <% include footer %>
