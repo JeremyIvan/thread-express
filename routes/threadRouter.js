@@ -76,9 +76,9 @@ threadRouter.route('/createThread')
     }
 })
 
-threadRouter.route('/viewThread/:threadTitle')
+threadRouter.route('/viewThread/:threadId')
 .get((req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .populate('comments.author')
     .populate('author')
     .then(thread => {
@@ -93,12 +93,12 @@ threadRouter.route('/viewThread/:threadTitle')
     .catch(err => next(err))
 })
 
-threadRouter.route('/editThread/:threadTitle')
+threadRouter.route('/editThread/:threadId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title": req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread.author._id.equals(req.user._id)){
-            Threads.findOne({ "title" : req.params.threadTitle})
+            Threads.findById(req.params.threadId)
             .then(thread => {
                 res.render('editThread', { threads : thread })
                 res.statusCode = 200
@@ -110,10 +110,10 @@ threadRouter.route('/editThread/:threadTitle')
     })
 })
 .post(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title": req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread.author._id.equals(req.user._id)){
-            Threads.findOneAndUpdate({ "title" : req.params.threadTitle }, {
+            Threads.findByIdAndUpdate(req.params.threadId, {
                 $set: req.body
             }, { new: true })
             .then(thread => {
@@ -128,12 +128,12 @@ threadRouter.route('/editThread/:threadTitle')
     })
 })
 
-threadRouter.route('/deleteThread/:threadTitle')
+threadRouter.route('/deleteThread/:threadId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title": req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread.author._id.equals(req.user._id)){
-            Threads.findOneAndRemove({ "title" : req.params.threadTitle })
+            Threads.findByIdAndRemove(req.params.threadId)
             .then(thread => {
                 if ( thread != null) {
                     res.statusCode = 200
@@ -152,26 +152,26 @@ threadRouter.route('/deleteThread/:threadTitle')
     })
 })
 
-threadRouter.route('/viewThread/:threadTitle/postComment')
+threadRouter.route('/viewThread/:threadId/postComment')
 .post(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread != null) {
             req.body.author = req.user._id
             thread.comments.push(req.body)
             thread.save()
             .then(thread => {
-                Threads.findOne({ 'title' : req.params.threadTitle })
+                Threads.findById(req.params.threadId)
                 .populate('comments.author')
                 .then(thread => {
                     res.statusCode = 200
                     res.setHeader('Content-Type', 'application/json')
-                    res.redirect('/threads/viewThread/'+req.params.threadTitle)
+                    res.redirect('/threads/viewThread/' + req.params.threadId)
                 })
             }, err => { next(err) })
         }
         else {
-            err = new Error('Thread ' + req.params.threadTitle + ' not found')
+            err = new Error('Thread ' + req.params.threadId + ' not found')
             err.status = 404
             return next(err)
         }
@@ -179,13 +179,13 @@ threadRouter.route('/viewThread/:threadTitle/postComment')
     .catch((err) => next(err))
 })
 
-threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
+threadRouter.route('/viewThread/:threadId/deleteComment/:commentId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread != null && thread.comments.id(req.params.commentId) != null){
             if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
-                Threads.findOne( { "title" : req.params.threadTitle })
+                Threads.findById(req.params.threadId)
                 .then(thread => {
                     if(thread != null && thread.comments.id(req.params.commentId) != null){
                         thread.comments.id(req.params.commentId).remove()
@@ -193,11 +193,11 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
                         .then(thread => {
                             res.statusCode = 200
                             res.setHeader('Content-Type', 'application/json')
-                            res.redirect('/threads/viewThread/' + req.params.threadTitle)
+                            res.redirect('/threads/viewThread/' + req.params.threadId)
                         }, err => next(err))
                     }
                     else if (thread == null){
-                        err = new Error('Thread ' + req.params.threadTitle + " not found")
+                        err = new Error('Thread ' + req.params.threadId + " not found")
                         err.status = 404
                         return next(err)
                     }
@@ -214,7 +214,7 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
             }
         }
         else if (thread == null){
-            err = new Error('Thread ' + req.params.threadTitle + " not found")
+            err = new Error('Thread ' + req.params.threadId + " not found")
             err.status = 404
             return next(err)
         }
@@ -226,22 +226,20 @@ threadRouter.route('/viewThread/:threadTitle/deleteComment/:commentId')
     })
 })
 
-threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
+threadRouter.route('/viewThread/:threadId/editComment/:commentId')
 .get(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread != null && thread.comments.id(req.params.commentId) != null){
             if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
-                Threads.findOne({ "title" : req.params.threadTitle })
+                Threads.findById(req.params.threadId)
                 .then(thread => {
                     if(thread != null && thread.comments.id(req.params.commentId) != null){
                         if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
-                            Threads.findOne({ "title" : req.params.threadTitle})
+                            Threads.findById(req.params.threadId)
                             .then(thread => {
                                 res.render('editComment', {threads : thread.comments.id(req.params.commentId)})
                                 res.statusCode = 200
-                                res.setHeader('Content-Type', 'application/json')
-                                res.json(thread.comments.id(req.params.commentId))
                             })
                         }
                         else {
@@ -249,7 +247,7 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
                         }
                     }
                     else if (thread == null){
-                        err = new Error('Thread ' + req.params.threadTitle + " not found")
+                        err = new Error('Thread ' + req.params.threadId + " not found")
                         err.status = 404
                         return next(err)
                     }
@@ -265,7 +263,7 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
             }
         }
         else if (thread == null){
-            err = new Error('Thread ' + req.params.threadTitle + " not found")
+            err = new Error('Thread ' + req.params.threadId + " not found")
             err.status = 404
             return next(err)
         }
@@ -277,11 +275,11 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
     })
 })
 .post(authenticate.verifyUser, (req, res, next) => {
-    Threads.findOne({ "title" : req.params.threadTitle })
+    Threads.findById(req.params.threadId)
     .then(thread => {
         if(thread != null && thread.comments.id(req.params.commentId) != null){
             if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
-                Threads.findOne({ "title" : req.params.threadTitle })
+                Threads.findById(req.params.threadId)
                 .then(thread => {
                     if(thread != null && thread.comments.id(req.params.commentId) != null) {
                         if(req.body.comment) {
@@ -291,11 +289,11 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
                         .then(thread => {
                             res.statusCode = 200
                             res.setHeader('Content-Type', 'application/json')
-                            res.redirect('/threads/viewThread/' + req.params.threadTitle)
+                            res.redirect('/threads/viewThread/' + req.params.threadId)
                         }, err => next(err))
                     }
                     else if (thread == null) {
-                        err = new Error('Thread ' + req.params.threadTitle + ' not found')
+                        err = new Error('Thread ' + req.params.threadId + ' not found')
                         err.status = 404
                         return next(err)
                     }
@@ -312,7 +310,7 @@ threadRouter.route('/viewThread/:threadTitle/editComment/:commentId')
             }
         }
         else if (thread == null){
-            err = new Error('Thread ' + req.params.threadTitle + " not found")
+            err = new Error('Thread ' + req.params.threadId + " not found")
             err.status = 404
             return next(err)
         }
