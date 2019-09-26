@@ -41,20 +41,23 @@
                         </label>
                         <div class="form-group">
                             <%= entry.comment%>
-                            <div class="form-group float-right">
-                                <a href="/threads/viewThread/<%= threads._id %>/deleteComment/<%= entry._id %>" class="btn btn-danger float-right">
-                                    <span aria-hidden="true">&times;</span>
-                                </a>
-                            </div>
                         </div>
                     </label>
                 </div>
 
-                <div class="form-group float-right">
-                    <a href="/threads/viewThread/<%= threads._id %>/editComment/<%= entry._id %>" class="btn btn-warning float-right">
-                        Edit
-                    </a>
-                </div>
+                <% if (entry.author._id.equals(user_id)) { %>
+                    <div class="form-group float-right">
+                        <a href="/threads/viewThread/<%= threads._id %>/deleteComment/<%= entry._id %>" class="btn btn-danger float-right">
+                            <span aria-hidden="true">&times;</span>
+                        </a>
+                    </div>
+
+                    <div class="form-group float-right">
+                        <a href="/threads/viewThread/<%= threads._id %>/editComment/<%= entry._id %>" class="btn btn-warning float-right">
+                            Edit
+                        </a>
+                    </div>
+                <% } %>
             <% }) %>
         <% } else { %>   
             No Comments found!

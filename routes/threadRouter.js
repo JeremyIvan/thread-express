@@ -25,12 +25,12 @@ const threadRouter = express.Router()
 threadRouter.use(bodyParser.json())
 
 threadRouter.route('/listThreads')
-.get((req, res, next) => {
+.get(authenticate.verifyUser, (req, res, next) => {
     Threads.find({})
     .populate('author')
     .populate('comments.author')
     .then(threads => {
-        res.render('listThreads', { threads: threads })
+        res.render('listThreads', { threads: threads, user_id : req.user._id })
         res.statusCode = 200
     }, err => next(err))
     .catch(err => next(err))
@@ -77,13 +77,13 @@ threadRouter.route('/createThread')
 })
 
 threadRouter.route('/viewThread/:threadId')
-.get((req, res, next) => {
+.get(authenticate.verifyUser, (req, res, next) => {
     Threads.findById(req.params.threadId)
     .populate('comments.author')
     .populate('author')
     .then(thread => {
         if( thread != null){
-            res.render('viewThread', { threads: thread })
+            res.render('viewThread', { threads: thread, user_id : req.user._id })
             res.statusCode = 200
         }
         else {
