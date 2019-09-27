@@ -1,5 +1,9 @@
 <% include header %>
 
+<h4>
+    Hello <%= current_user %>
+</h4>
+
 <h2>Thread List</h2>
 
 <div class="container-fluid"> 
@@ -8,22 +12,21 @@
         <% if (threads.length) { %>
             <% threads.forEach(function(entry) { %>
                 <div class="text-muted float-right">
-
-                    <button type="button" class="list-group-item list-group-item-action" name="selectedStudent" id="selectedStudent">
-                        <div>
-                            Author: <%= entry.author.username %>
-                        </div>
-
-                        <div>
-                            <%= entry.title%>
-                        </div>
+                    <a href="/threads/viewThread/<%= entry._id %>" class="list-group-item list-group-item-action">                        
+                        <h5>
+                                <%= entry.title%>
+                        </h5>                                
 
                         <div class="form-group">
                             <%= entry.body%>
                         </div>
-                    </button>
 
-                    <div class="form-group float-right">
+                        <div class="input-group-text col-sm-2">
+                            Author: <%= entry.author.username %>
+                        </div>
+                    </a>                        
+
+                    <!-- <div class="form-group float-right">
                         <a href="/threads/viewThread/<%= entry._id %>" class="btn btn-info float-right">
                             View
                         </a>
@@ -41,7 +44,7 @@
                                 Delete
                             </a>
                         </div>
-                    <% } %>
+                    <% } %> -->
                 </div>
             <% }) %>
         <% } else { %>   

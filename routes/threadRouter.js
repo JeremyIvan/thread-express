@@ -30,7 +30,7 @@ threadRouter.route('/listThreads')
     .populate('author')
     .populate('comments.author')
     .then(threads => {
-        res.render('listThreads', { threads: threads, user_id : req.user._id })
+        res.render('listThreads', { threads: threads, user_id : req.user._id, current_user : req.user.username })
         res.statusCode = 200
     }, err => next(err))
     .catch(err => next(err))
@@ -38,7 +38,7 @@ threadRouter.route('/listThreads')
 
 threadRouter.route('/createThread')
 .get(authenticate.verifyUser, (req, res, next) => {
-    res.render('createThread')
+    res.render('createThread', { current_user : req.user.username})
 })
 .post(authenticate.verifyUser, upload.single('image'), (req, res, next) => {
     if(req.file !== undefined) {
@@ -83,7 +83,7 @@ threadRouter.route('/viewThread/:threadId')
     .populate('author')
     .then(thread => {
         if( thread != null){
-            res.render('viewThread', { threads: thread, user_id : req.user._id })
+            res.render('viewThread', { threads: thread, user_id : req.user._id, current_user : req.user.username })
             res.statusCode = 200
         }
         else {
@@ -100,7 +100,7 @@ threadRouter.route('/editThread/:threadId')
         if(thread.author._id.equals(req.user._id)){
             Threads.findById(req.params.threadId)
             .then(thread => {
-                res.render('editThread', { threads : thread })
+                res.render('editThread', { threads : thread, current_user : req.user.username })
                 res.statusCode = 200
             })
         }
@@ -109,23 +109,45 @@ threadRouter.route('/editThread/:threadId')
         }
     })
 })
-.post(authenticate.verifyUser, (req, res, next) => {
-    Threads.findById(req.params.threadId)
-    .then(thread => {
-        if(thread.author._id.equals(req.user._id)){
-            Threads.findByIdAndUpdate(req.params.threadId, {
-                $set: req.body
-            }, { new: true })
-            .then(thread => {
-                res.statusCode = 200
-                res.redirect('/threads/listThreads')
-            }, err => next(err))
-            .catch(err => next(err))
-        }
-        else {
-            return next(new Error("You are not authorized to modify thread"))
-        }
-    })
+.post(authenticate.verifyUser, upload.single('image'), (req, res, next) => {
+    if(req.file !== undefined) {
+        req.body.image = req.file.filename
+        Threads.findById(req.params.threadId)
+        .then(thread => {
+            if(thread.author._id.equals(req.user._id)){
+                Threads.findByIdAndUpdate(req.params.threadId, {
+                    $set: req.body
+                }, { new: true })
+                .then(thread => {
+                    res.statusCode = 200
+                    res.redirect('/threads/listThreads')
+                }, err => next(err))
+                .catch(err => next(err))
+            }
+            else {
+                return next(new Error("You are not authorized to modify thread"))
+            }
+        })
+    }
+    else {
+        Threads.findById(req.params.threadId)
+        .then(thread => {
+            if(thread.author._id.equals(req.user._id)){
+                Threads.findByIdAndUpdate(req.params.threadId, {
+                    $set: req.body
+                }, { new: true })
+                .then(thread => {
+                    res.statusCode = 200
+                    res.redirect('/threads/listThreads')
+                }, err => next(err))
+                .catch(err => next(err))
+            }
+            else {
+                return next(new Error("You are not authorized to modify thread"))
+            }
+        })
+    }
+    
 })
 
 threadRouter.route('/deleteThread/:threadId')
@@ -238,7 +260,7 @@ threadRouter.route('/viewThread/:threadId/editComment/:commentId')
                         if(thread.comments.id(req.params.commentId).author._id.equals(req.user._id)){
                             Threads.findById(req.params.threadId)
                             .then(thread => {
-                                res.render('editComment', {threads : thread.comments.id(req.params.commentId)})
+                                res.render('editComment', {threads : thread.comments.id(req.params.commentId), current_user : req.user.username})
                                 res.statusCode = 200
                             })
                         }

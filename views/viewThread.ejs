@@ -1,32 +1,54 @@
 <% include header %>
 
+<h4>
+    Hello <%= current_user %>
+</h4>
+
 <h2>Thread</h2>
 
-<div class="form-group row">
-    <label class="input-group-text col-sm-2">Title:</label>
-    <label class="input-group-text col-sm-10">
-        <%= threads.title %>
-    </label>
-</div>
-
-<div class="form-group row">
-        <label class="input-group-text col-sm-2">Author:</label>
-        <label class="input-group-text col-sm-10">
-            <%= threads.author.username %>
-        </label>
-</div>
-<% if (threads.image) { %>
+<div class="container-fluid">
     <div class="form-group row">
-        <label class="input-group-text col-sm-2">Image:</label>
-        <img src="/images/<%= threads.image %>" alt="No Thread Image Found" class="input-group-text col-sm-10">
+        <label class="input-group-text col-sm-2">Title:</label>
+        <label class="input-group-text col-sm-10">
+            <%= threads.title %>
+        </label>
     </div>
-<% } %>
+    
+    <div class="form-group row">
+            <label class="input-group-text col-sm-2">Author:</label>
+            <label class="input-group-text col-sm-10">
+                <%= threads.author.username %>
+            </label>
+    </div>
+    <% if (threads.image) { %>
+        <div class="form-group row">
+            <label class="input-group-text col-sm-2">Image:</label>
+            <img src="/images/<%= threads.image %>" alt="No Thread Image Found" class="input-group-text col-sm-10">
+        </div>
+    <% } %>
+    
+    <div class="form-group row">
+        <label class="input-group-text col-sm-2">Content:</label>
+        <textarea class="input-group-text col-sm-10" rows="5" disabled>
+            <%= threads.body %>
+        </textarea>
+    </div>
+</div>
 
-<div class="form-group row">
-    <label class="input-group-text col-sm-2">Content:</label>
-    <textarea class="input-group-text col-sm-10" rows="5" disabled>
-        <%= threads.body %>
-    </textarea>
+<div class="form-group row float-right">
+    <% if (threads.author._id.equals(user_id)) { %>
+        <div class="form-group">
+            <a href="/threads/editThread/<%= threads._id %>" class="btn btn-warning float-right">
+                Edit Thread
+            </a>
+        </div>
+            
+        <div class="form-group">
+            <a href="/threads/deleteThread/<%= threads._id %>" class="btn btn-danger float-right">
+                Delete Thread
+            </a>
+        </div>
+    <% } %>
 </div>
 
 <div class="form-group">

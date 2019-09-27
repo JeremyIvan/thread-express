@@ -59,7 +59,7 @@ userRouter.route("/login")
 userRouter.route("/logout")
 .get(authenticate.verifyUser, (req, res, next)=>{
   if (req.cookies) {
-    res.clearCookie('authToken', { path: '/', domain: 'localhost' })
+    res.clearCookie('authToken')
     res.redirect('/')
   }
   else {

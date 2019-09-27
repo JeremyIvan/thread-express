@@ -1,8 +1,12 @@
 <% include header %>
 
+<h4>
+    Hello <%= current_user %>
+</h4>
+
 <h2>Edit Comment</h2>
 
-<form method="post" role="form">
+<form method="post" role="form" onsubmit="return confirm('Do you really want to submit the form?');">
     <div class="form-group row">
         <label for="comment" class="input-group-text col-sm-2">Comment:</label>
         <textarea type="text" class="form-control" id="comment" name="comment"  rows="5" required><%= threads.comment %></textarea>
@@ -11,6 +15,18 @@
     <div class="form-group float-right">
         <input type="submit" value="Edit" class="btn btn-primary">
     </div>
+
+    <script>
+        function validate(form) {
+            if(!valid) {
+                alert('Please correct the errors in the form!');
+                return false;
+            }
+            else {
+                return confirm('Do you really want to edit comment?');
+            }
+        }
+    </script>
 </form>
 
 <% include footer %>

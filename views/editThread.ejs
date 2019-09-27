@@ -1,14 +1,30 @@
 <% include header %>
 
+<h4>
+    Hello <%= current_user %>
+</h4>
+
 <h2>Edit Thread</h2>
 
-<form method="post" role="form">
+<form method="post" role="form" enctype="multipart/form-data" onsubmit="return confirm('Do you really want to submit the form?');">
     <div class="form-group row">
         <label for="title" class="input-group-text col-sm-2">Title:</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="title" name="title" value="<%= threads.title %>" required>
         </div>
     </div> 
+
+    <div class="form-group row">
+        <label for="image" class="input-group-text col-sm-2">Upload Image:</label>
+        <input type="file" class="form-control" id="image" name="image" value="<%= threads.image %>" title="<%= threads.image %>">
+    </div>
+    
+    <% if (threads.image) { %>
+        <div class="form-group row">
+            <label class="input-group-text col-sm-10">Current Uploaded Image:</label>
+            <img src="/images/<%= threads.image %>" alt="No Thread Image Found" class="input-group-text col-sm-10">
+        </div>
+    <% } %>
   
     <div class="form-group row">
         <label for="body" class="input-group-text col-sm-2">Body:</label>
@@ -18,6 +34,18 @@
     <div class="form-group float-right">
         <input type="submit" value="Edit" class="btn btn-primary">
     </div>
+
+    <script>
+        function validate(form) {
+            if(!valid) {
+                alert('Please correct the errors in the form!');
+                return false;
+            }
+            else {
+                return confirm('Do you really want to edit thread?');
+            }
+        }
+    </script>
 </form>
 
 <% include footer %>
