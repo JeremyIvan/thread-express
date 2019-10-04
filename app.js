@@ -12,7 +12,7 @@ const config = require('./config')
 const threadRouter = require('./routes/threadRouter')
 const userRouter = require('./routes/userRouter')
 
-const connect = mongoose.connect(config.mongoUrl)
+const connect = mongoose.connect(config.mongoUrl, { useNewUrlParser: true })
 
 connect.then(db => {
   console.log('Connected correctly to ' + config.dbName)
@@ -26,7 +26,7 @@ app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
